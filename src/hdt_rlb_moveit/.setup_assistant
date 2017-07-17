@@ -1,0 +1,10 @@
+# The Automatic Setup Assistant Configuration
+
+moveit_setup_assistant_config:
+  URDF:
+    package: hdt_rlb_description
+    relative_path: urdf/hdt_rlb.xacro
+  SRDF:
+    relative_path: config/hdt_rlb.srdf
+  CONFIG:
+    generated_timestamp: 1439850928

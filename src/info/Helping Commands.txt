@@ -1,0 +1,41 @@
+ubuntu username : viki - administrator (may the sudo be with you)
+ubundu password : viki
+
+gnome-system-monitor  -  task manager
+
+roscore - loading node master
+rosclean check/purge - clean RAM
+
+catkin_make - build
+catkin_make install - first time package build
+cd ~/catkin_ws - changing directory
+cd ~/robil2
+cd ~/robil2.2
+source ./devel/setup.bash - setting the source
+
+cd ~/catkin_ws/;source ./devel/setup.bash;cd ~/robil2.2/;source ./devel/setup.bash; - setting sources
+
+cd ~/catkin_ws/;source ./devel/setup.bash;cd ~/robil2/;source ./devel/setup.bash;
+
+cd ~/catkin_ws/;source ./devel/setup.bash;cd ~/robil2-master/;source ./devel/setup.bash;
+
+rosrun live_bobcat setupEnv - building and compiling live_bobcat URDF/SDF files - complex bobcat
+
+rosrun srvss_bobcat setupEnv - building and compiling srvss_bobcat URDF/SDF files - simple bobcat
+
+roslaunch live_bobcat bobcat_empty_world.launch - loading complicated bobcat in empty world
+
+roslaunch robil2conf frameworkInit.launch - loading bobcat's brain node
+
+rosrun bobcat_teleop bobcat_keyboard_teleop_node - loading drive by keyboard node
+
+roslaunch srvss_wp_driver srvss_world.launch - loading simplified bobcat in 0 to 6 terrains
+
+rosrun srvss_wp_driver srvss_wp_driver_node -path 5 5 - loading way point drive node , <x1> <y1> , <x2> <y2> .... example 5 5
+
+roslaunch hdt_2_control 2_arm_control.launch 
+
+rosrun srvss_wp_driver srvss_wp_keyboard_commander_node - loading way point commander , need wp_driver_node to be active and 								   override its path
+
+
+

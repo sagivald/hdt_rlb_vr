@@ -1,0 +1,1034 @@
+<?xml version="1.0"?>
+<robot name="hdt_rlb" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<!-- constants -->
+	<xacro:property name="M_PI" value="3.1415926535897931"/>
+
+	<!-- materials -->
+	<material name="green">
+		<color rgba="${53/255} ${94/255} ${59/255} 1.0"/>
+	</material>
+
+	<material name="black">
+		<color rgba="${0/255} ${0/255} ${0/255} 1.0"/>
+	</material>
+
+	<material name="grey">
+		<color rgba="${40/255} ${40/255} ${40/255} 1.0"/>
+	</material>
+
+     <!-- default inertia -->
+     <xacro:macro name="default_inertia">
+           <inertia
+           ixx="0.0005" ixy="0.0" ixz="0.0"
+           iyy="0.0005" iyz="0.0"
+           izz="0.0005"/>
+     </xacro:macro>
+
+	<!-- import gazebo definitions -->
+	<xacro:include filename="$(find hdt_rlb_description)/urdf/hdt_rlb.gazebo" />
+
+	<!-- world -->
+	<link name="world"/>
+
+	<!-- integration kit -->
+	<joint name="integration_kit_joint" type="fixed">
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<parent link="world"/>
+		<child link="integration_kit_link"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="integration_kit_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/integration_kit.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/integration_kit.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="-0.0504221 0.0299319 0.1962111" rpy="0 0 0"/>
+			<mass value="0.7752836"/>
+				<inertia
+				ixx="0.0074897" ixy="0.0" ixz="0.0"
+				iyy="0.0085456" iyz="0.0"
+				izz="0.0047659"/>
+		</inertial>
+	</link>
+
+	<!-- segment 1 -->
+	<joint name="joint1" type="revolute">
+		<hdt id="1" kmin="100" kmax="200" inertia="0.1"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="60.0" lower="${-2*M_PI/3}" upper="${2*M_PI/3}" velocity="${2*M_PI/3}"/>
+		<origin xyz="-0.1 0 0.25" rpy="0 0 0"/>
+		<parent link="integration_kit_link"/>
+		<child link="link1"/>
+    	<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="link1">
+		<collision>
+			<origin xyz="0 0 0.0461" rpy="0 0 0"/>
+			<geometry>
+				<cylinder length="0.09217" radius="0.035865"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_1.STL"/>
+			</geometry>
+			<material name="green"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0 0.04488" rpy="0 0 0"/>
+			<mass value="1.00775"/>
+				<inertia
+				ixx="0.00104342" ixy="0.0" ixz="0.0"
+				iyy="0.00104342" iyz="0.0"
+				izz="0.00064952"/>
+		</inertial>
+	</link>
+
+	<joint name="joint1f" type="fixed">
+		<parent link="link1"/>
+		<child link="link2a"/>
+		<origin xyz="0 0 0.09217" rpy="0 0 0"/>
+	</joint>
+
+	<link name="link2a">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_2a.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_2a.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0 0.04417" rpy="0 0 0"/>
+			<mass value="0.66775"/>
+			<inertia
+			ixx="0.000912914" ixy="0.0" ixz="0.0"
+			iyy="0.001102412" iyz="0.0"
+			izz="0.00062987"/>
+		</inertial>
+	</link>
+
+	<!-- segment 2 -->
+	<joint name="joint2" type="revolute">
+		<hdt id="2" kmin="100" kmax="200" inertia="0.1"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="60.0" lower="${-2*M_PI/3}" upper="${2*M_PI/3}" velocity="${2*M_PI/3}"/>
+		<origin xyz="0 0 0.07" rpy="0 0 0"/>
+		<parent link="link2a"/>
+		<child link="link2b"/>
+    	<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="link2b">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_2b.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_2b.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0 0.02018" rpy="0 0 0"/>
+			<mass value="0.69896"/>
+			<inertia
+			ixx="0.000941825" ixy="0.0" ixz="0.0"
+			iyy="0.000881162" iyz="0.0"
+			izz="0.000329923"/>
+		</inertial>
+	</link>
+
+	<!-- segment 3 -->
+	<joint name="joint2f" type="fixed">
+		<origin xyz="0 0 0.077" rpy="0 0 0" />
+		<parent link="link2b"/>
+		<child link="link3"/>
+	</joint>
+
+	<link name="link3">
+		<collision>
+			<origin xyz="0 0 0.1265" rpy="0 0 0"/>
+			<geometry>
+				<cylinder length="0.2530" radius="0.035865"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_3.STL"/>
+			</geometry>
+			<material name="green"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0 0.12528" rpy="0 0 0"/>
+			<mass value="2.76251"/>
+			<inertia
+			ixx="0.015653102" ixy="0.0" ixz="0.0"
+			iyy="0.015653102" iyz="0.0"
+			izz="0.001778082"/>
+		</inertial>
+	</link>
+
+	<joint name="joint3f" type="fixed">
+		<origin xyz="0 0 0.2530" rpy="0 0 0"/>
+		<parent link="link3"/>
+		<child link="link4a"/>
+	</joint>
+
+	<link name="link4a">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_4a.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_4a.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0 0.04417" rpy="0 0 0"/>
+			<mass value="0.66775"/>
+			<inertia
+			ixx="0.000912914" ixy="0.0" ixz="0.0"
+			iyy="0.001102412" iyz="0.0"
+			izz="0.00062987"/>
+		</inertial>
+	</link>
+
+	<!-- segment 4 -->
+	<joint name="joint4" type="revolute">
+		<hdt id="4" kmin="75" kmax="150" inertia="0.075"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="60.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="${2*M_PI/3}"/>
+		<origin xyz="0 0 0.07" rpy="0 0 0"/>
+		<parent link="link4a"/>
+		<child link="link4b"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="link4b">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_4b.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_4b.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.02126 0.03702" rpy="0 0 0"/>
+			<mass value="0.18911"/>
+			<inertia
+			ixx="0.000375485" ixy="0.000000486" ixz="-0.000000844"
+			iyy="0.000332021" iyz="-0.0000969"
+			izz="0.000156947"/>
+		</inertial>
+	</link>
+
+	<!-- wire cover -->
+	<joint name="wire_cover_joint" type="fixed">
+		<origin xyz="0 -0.0363 0.074" rpy="0 0 0"/>
+		<parent link="link4b"/>
+		<child link="wire_cover_link"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="wire_cover_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/wire_cover.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/wire_cover.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0.0145220 -0.0164455" rpy="0 0 0"/>
+			<mass value="0.0161288"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- accessory puck -->
+	<joint name="accessory_puck_joint" type="fixed">
+		<origin xyz="0 -0.0413 0.074" rpy="0 0 0"/>
+		<parent link="link4b"/>
+		<child link="accessory_puck_link"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="accessory_puck_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/accessory_puck.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/accessory_puck.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="-0.0011693 -0.0213073 0" rpy="0 0 0"/>
+			<mass value="0.1971085"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- camera mount -->
+	<joint name="camera_mount_joint" type="fixed">
+		<origin xyz="0.042 -0.0216 0" rpy="0 0 0"/>
+		<parent link="accessory_puck_link"/>
+		<child link="camera_mount_link"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="camera_mount_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/camera_mount.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/camera_mount.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0.0068304 0 0" rpy="0 0 0"/>
+			<mass value="0.0090492"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- camera -->
+	<joint name="camera_joint" type="fixed">
+		<origin xyz="0.0235 -0.0284 0" rpy="0 0 0"/>
+		<parent link="camera_mount_link"/>
+		<child link="camera_link"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="camera_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/camera.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/camera.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0.0392605 0" rpy="0 0 0"/>
+			<mass value="0.0577052"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- camera -->
+	<joint name="camera_optical_joint" type="fixed">
+		<!--<origin xyz="0 0 0" rpy="${M_PI/2} ${M_PI} 0"/>-->
+		<origin xyz="0 0 0" rpy="0 0 ${-M_PI/2}"/>
+		<parent link="camera_link"/>
+		<child link="camera_optical_frame"/>
+	</joint>
+
+	<link name="camera_optical_frame">
+	</link>
+
+	<!-- segment 5 -->
+	<joint name="joint5" type="revolute">
+		<hdt id="5" kmin="50" kmax="100" inertia="0.05"/>
+		<axis xyz="0 -1 0"/>
+		<limit effort="60.0" lower="${-2*M_PI/3}" upper="${2*M_PI/3}" velocity="${2*M_PI/3}"/>
+		<origin xyz="0 -0.0425 0" rpy="0 0 0"/>
+		<parent link="accessory_puck_link"/>
+		<child link="link5"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="link5">
+		<collision>
+			<origin xyz="0 -0.1500 0" rpy="${M_PI/2} 0 0"/>
+			<geometry>
+				<cylinder length="0.3000" radius="0.035865"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_5.STL"/>
+			</geometry>
+			<material name="green"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.1478 0" rpy="0 0 0"/>
+			<mass value="3.27531"/>
+			<inertia
+			ixx="0.025657659" ixy="0.0" ixz="0.0"
+			iyy="0.002107885" iyz="0.0"
+			izz="0.025657659"/>
+		</inertial>
+	</link>
+
+	<joint name="joint5f" type="fixed">
+		<origin xyz="0 -0.3 0" rpy="0 0 0"/>
+		<parent link="link5"/>
+		<child link="link6a"/>
+	</joint>
+
+	<link name="link6a">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_6a.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_6a.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.04112 0" rpy="0 0 0"/>
+			<mass value="0.50058"/>
+			<inertia
+			ixx="0.000580228" ixy="0.0" ixz="0.0"
+			iyy="0.000541503" iyz="0.0"
+			izz="0.000750977"/>
+		</inertial>
+	</link>
+
+	<!-- segment 6 -->
+	<joint name="joint6" type="revolute">
+		<hdt id="6" kmin="50" kmax="100" inertia="0.05"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="60.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="${2*M_PI/3}"/>
+		<origin xyz="0 -0.055 0" rpy="0 0 0"/>
+		<parent link="link6a"/>
+		<child link="link6b"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="link6b">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_6b.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_6b.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.03855 0" rpy="0 0 0"/>
+			<mass value="0.99934"/>
+			<inertia
+			ixx="0.001905243" ixy="0.0" ixz="0.0"
+			iyy="0.000474765" iyz="0.0"
+			izz="0.001905243"/>
+		</inertial>
+	</link>
+
+	<!-- segment 7 -->
+	<joint name="joint7" type="revolute">
+		<hdt id="7" kmin="50" kmax="100" inertia="0.05"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="60.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="${2*M_PI/3}"/>
+		<origin xyz="0 -0.0771 0" rpy="0 0 0"/>
+		<parent link="link6b"/>
+		<child link="link7"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="link7">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_7.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_7.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.01177 0" rpy="0 0 0"/>
+			<mass value="0.47608"/>
+			<inertia
+			ixx="0.000705091" ixy="0.0" ixz="0.0"
+			iyy="0.000537081" iyz="0.0"
+			izz="0.000534342"/>
+		</inertial>
+	</link>
+
+	<!-- endpoint -->
+	<joint name="endpoint_joint" type="fixed">
+		<origin xyz="0 -0.055 0" rpy="0 0 0"/>
+		<parent link="link7"/>
+		<child link="endpoint_link"/>
+	</joint>
+
+	<link name="endpoint_link">
+	</link>
+
+	<!-- palm -->
+	<joint name="palm" type="fixed">
+		<origin xyz="0 -0.055 0" rpy="0 0 0"/>
+		<parent link="link7"/>
+		<child link="palm"/>
+	</joint>
+
+	<link name="palm">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_palm.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0.0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_palm.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.08326 -0.00539" rpy="0 0 0"/>
+			<mass value="0.56756"/>
+			<inertia
+			ixx="0.001727803" ixy="0.000001205" ixz="0.0"
+			iyy="0.000549457" iyz="-0.000101997"
+			izz="0.001418031"/>
+		</inertial>
+	</link>
+
+	<!-- thumb base -->
+	<joint name="thumb_base" type="revolute">
+		<hdt id="10" kmin="10" kmax="2" inertia="0.01"/>
+		<axis xyz="0 -1 0"/>
+		<limit effort="4.0" lower="${-M_PI/2}" upper="${M_PI/2}" velocity="${4*M_PI/3}"/>
+		<origin xyz="0 -0.05039 0.01529" rpy="0 0 0"/>
+		<parent link="palm"/>
+		<child link="thumb_base"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="thumb_base">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_base.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_base.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.02653 0.02207" rpy="0 0 0"/>
+			<mass value="0.08562"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- thumb prox -->
+	<joint name="thumb_prox" type="revolute">
+		<hdt id="11" kmin="10" kmax="2" inertia="0.01"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="4.0" lower="${-M_PI/4}" upper="${M_PI/2}" velocity="${4*M_PI/3}"/>
+		<origin xyz="0.00214 -0.02759 0.05700" rpy="0 0 0"/>
+		<parent link="thumb_base"/>
+		<child link="thumb_prox"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="thumb_prox">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_prox.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_prox.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 0.001 0.02063" rpy="0 0 0"/>
+			<mass value="0.02523"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- thumb med -->
+	<joint name="thumb_med" type="fixed">
+		<origin xyz="0 0.00285 0.04341" rpy="0 0 0"/>
+		<parent link="thumb_prox"/>
+		<child link="thumb_med"/>
+	</joint>
+
+	<link name="thumb_med">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_med.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_med.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.00353 0.01162" rpy="0 0 0"/>
+			<mass value="0.0085"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- thumb dist -->
+	<joint name="thumb_dist" type="fixed">
+		<origin xyz="0 -0.0009 0.02769" rpy="0 0 0"/>
+		<parent link="thumb_med"/>
+		<child link="thumb_dist"/>
+	</joint>
+
+	<link name="thumb_dist">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_dist.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_thumb_dist.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0 -0.00131 0.01323" rpy="0 0 0"/>
+			<mass value="0.0092"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- index prox -->
+	<joint name="index_prox" type="revolute">
+		<hdt id="12" kmin="10" kmax="2" inertia="0.01"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="4.0" lower="${-M_PI/4}" upper="${M_PI/2}" velocity="${4*M_PI/3}"/>
+		<origin xyz="0 -0.16325 0.02701" rpy="0 0 0"/>
+		<parent link="palm"/>
+		<child link="index_prox"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="index_prox">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_index_prox.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_index_prox.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="-0.001 -0.02063 0" rpy="0 0 0"/>
+			<mass value="0.02523"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- index med -->
+	<joint name="index_med" type="fixed">
+		<origin xyz="-0.00285 -0.04341 0" rpy="0 0 0"/>
+		<parent link="index_prox"/>
+		<child link="index_med"/>
+	</joint>
+
+	<link name="index_med">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_index_med.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_index_med.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0.00353 -0.01162 0" rpy="0 0 0"/>
+			<mass value="0.0085"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- index dist -->
+	<joint name="index_dist" type="fixed">
+		<origin xyz="0.0009 -0.02769 0" rpy="0 0 0"/>
+		<parent link="index_med"/>
+		<child link="index_dist"/>
+	</joint>
+
+	<link name="index_dist">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_index_dist.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_index_dist.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0.00131 -0.01323 0" rpy="0 0 0"/>
+			<mass value="0.0092"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- ring prox -->
+	<joint name="ring_prox" type="revolute">
+		<hdt id="13" kmin="10" kmax="2" inertia="0.01"/>
+		<axis xyz="0 0 1"/>
+		<limit effort="4.0" lower="${-M_PI/4}" upper="${M_PI/2}" velocity="${4*M_PI/3}"/>
+		<origin xyz="0 -0.16325 -0.02701" rpy="0 0 0"/>
+		<parent link="palm"/>
+		<child link="ring_prox"/>
+		<dynamics damping="0.7" friction="0.0"/>
+	</joint>
+
+	<link name="ring_prox">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_ring_prox.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_ring_prox.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="-0.001 -0.02063 0" rpy="0 0 0"/>
+			<mass value="0.02523"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- ring med -->
+	<joint name="ring_med" type="fixed">
+		<origin xyz="-0.00285 -0.04341 0" rpy="0 0 0"/>
+		<parent link="ring_prox"/>
+		<child link="ring_med"/>
+	</joint>
+
+	<link name="ring_med">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_ring_med.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_ring_med.STL"/>
+			</geometry>
+			<material name="black"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0.00353 -0.01162 0" rpy="0 0 0"/>
+			<mass value="0.0085"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- ring dist -->
+	<joint name="ring_dist" type="fixed">
+		<origin xyz="0.0009 -0.02769 0" rpy="0 0 0"/>
+		<parent link="ring_med"/>
+		<child link="ring_dist"/>
+	</joint>
+
+	<link name="ring_dist">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_ring_dist.STL"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://hdt_rlb_description/meshes/hdt_6dof_ring_dist.STL"/>
+			</geometry>
+			<material name="grey"/>
+		</visual>
+
+		<inertial>
+			<origin xyz="0.00131 -0.01323 0" rpy="0 0 0"/>
+			<mass value="0.0092"/>
+			<xacro:default_inertia />
+		</inertial>
+	</link>
+
+	<!-- transmissions -->
+	<!-- joint1 -->
+	<transmission name="tran1">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="joint1">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="motor1">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- joint2 -->
+	<transmission name="tran2">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="joint2">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="motor2">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- joint4 -->
+	<transmission name="tran4">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="joint4">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="motor4">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- joint5 -->
+	<transmission name="tran5">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="joint5">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="motor5">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- joint6 -->
+	<transmission name="tran6">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="joint6">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="motor6">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- joint7 -->
+	<transmission name="tran7">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="joint7">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="motor7">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- thumb base -->
+	<transmission name="thumb_base">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="thumb_base">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="thumb_base">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- thumb prox -->
+	<transmission name="thumb_prox">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="thumb_prox">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="thumb_prox">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- index prox -->
+	<transmission name="index_prox">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="index_prox">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="index_prox">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+	<!-- ring prox -->
+	<transmission name="ring_prox">
+		<type>transmission_interface/SimpleTransmission</type>
+			<joint name="ring_prox">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+			</joint>
+		<actuator name="ring_prox">
+			<hardwareInterface>EffortJointInterface</hardwareInterface>
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+</robot>
+

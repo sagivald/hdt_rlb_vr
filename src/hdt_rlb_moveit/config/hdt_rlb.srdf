@@ -1,0 +1,346 @@
+<?xml version="1.0" ?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="hdt_rlb">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="arm">
+        <link name="link1" />
+        <link name="link2a" />
+        <link name="link2b" />
+        <link name="link3" />
+        <link name="link4a" />
+        <link name="link4b" />
+        <link name="accessory_puck_link" />
+        <link name="link5" />
+        <link name="link6a" />
+        <link name="link6b" />
+        <link name="link7" />
+        <link name="endpoint_link" />
+    </group>
+    <group name="hand">
+        <link name="endpoint_link" />
+        <link name="palm" />
+        <link name="index_prox" />
+        <link name="index_med" />
+        <link name="index_dist" />
+        <link name="ring_prox" />
+        <link name="ring_med" />
+        <link name="ring_dist" />
+        <link name="thumb_base" />
+        <link name="thumb_prox" />
+        <link name="thumb_med" />
+        <link name="thumb_dist" />
+    </group>
+    <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
+    <group_state name="home" group="arm">
+        <joint name="joint1" value="0" />
+        <joint name="joint2" value="0" />
+        <joint name="joint4" value="0" />
+        <joint name="joint5" value="0" />
+        <joint name="joint6" value="0" />
+        <joint name="joint7" value="0" />
+    </group_state>
+    <group_state name="stowed" group="arm">
+        <joint name="joint1" value="0" />
+        <joint name="joint2" value="-1.4" />
+        <joint name="joint4" value="1.4" />
+        <joint name="joint5" value="-1.5708" />
+        <joint name="joint6" value="0" />
+        <joint name="joint7" value="1.4" />
+    </group_state>
+    <group_state name="hand_home" group="hand">
+        <joint name="index_prox" value="0" />
+        <joint name="ring_prox" value="0" />
+        <joint name="thumb_base" value="0" />
+        <joint name="thumb_prox" value="0" />
+    </group_state>
+    <group_state name="hand_open" group="hand">
+        <joint name="index_prox" value="0" />
+        <joint name="ring_prox" value="0" />
+        <joint name="thumb_base" value="-1.5707" />
+        <joint name="thumb_prox" value="0" />
+    </group_state>
+    <group_state name="hand_close" group="hand">
+        <joint name="index_prox" value="1.5707" />
+        <joint name="ring_prox" value="1.5707" />
+        <joint name="thumb_base" value="-1.5707" />
+        <joint name="thumb_prox" value="1.5707" />
+    </group_state>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="hand" parent_link="link7" group="hand" />
+    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
+    <virtual_joint name="virtual_joint" type="fixed" parent_frame="odom_combined" child_link="world" />
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="accessory_puck_link" link2="camera_link" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="camera_mount_link" reason="Adjacent" />
+    <disable_collisions link1="accessory_puck_link" link2="index_dist" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="index_med" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="index_prox" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="integration_kit_link" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="link1" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="link2a" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="link2b" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="link4b" reason="Adjacent" />
+    <disable_collisions link1="accessory_puck_link" link2="link5" reason="Adjacent" />
+    <disable_collisions link1="accessory_puck_link" link2="link6a" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="link6b" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="link7" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="palm" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="ring_med" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="accessory_puck_link" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="camera_link" link2="camera_mount_link" reason="Adjacent" />
+    <disable_collisions link1="camera_link" link2="index_dist" reason="Never" />
+    <disable_collisions link1="camera_link" link2="index_med" reason="Never" />
+    <disable_collisions link1="camera_link" link2="index_prox" reason="Never" />
+    <disable_collisions link1="camera_link" link2="integration_kit_link" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link1" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link2a" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link2b" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link3" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link4a" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link4b" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link5" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link6a" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link6b" reason="Never" />
+    <disable_collisions link1="camera_link" link2="link7" reason="Never" />
+    <disable_collisions link1="camera_link" link2="palm" reason="Never" />
+    <disable_collisions link1="camera_link" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="camera_link" link2="ring_med" reason="Never" />
+    <disable_collisions link1="camera_link" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="camera_link" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="camera_link" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="camera_link" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="camera_link" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="camera_link" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="index_dist" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="index_med" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="index_prox" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="integration_kit_link" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link1" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link2a" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link2b" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link3" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link4a" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link4b" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link5" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link6a" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link6b" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="link7" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="palm" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="ring_med" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="camera_mount_link" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="index_dist" link2="index_med" reason="Adjacent" />
+    <disable_collisions link1="index_dist" link2="index_prox" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link2a" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link2b" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link3" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link4a" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link4b" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link5" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link6a" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link6b" reason="Never" />
+    <disable_collisions link1="index_dist" link2="link7" reason="Never" />
+    <disable_collisions link1="index_dist" link2="palm" reason="Never" />
+    <disable_collisions link1="index_dist" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="index_dist" link2="ring_med" reason="Never" />
+    <disable_collisions link1="index_dist" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="index_dist" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="index_dist" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="index_dist" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="index_dist" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="index_med" link2="index_prox" reason="Adjacent" />
+    <disable_collisions link1="index_med" link2="link2a" reason="Never" />
+    <disable_collisions link1="index_med" link2="link2b" reason="Never" />
+    <disable_collisions link1="index_med" link2="link3" reason="Never" />
+    <disable_collisions link1="index_med" link2="link4a" reason="Never" />
+    <disable_collisions link1="index_med" link2="link4b" reason="Never" />
+    <disable_collisions link1="index_med" link2="link5" reason="Never" />
+    <disable_collisions link1="index_med" link2="link6a" reason="Never" />
+    <disable_collisions link1="index_med" link2="link6b" reason="Never" />
+    <disable_collisions link1="index_med" link2="link7" reason="Never" />
+    <disable_collisions link1="index_med" link2="palm" reason="Never" />
+    <disable_collisions link1="index_med" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="index_med" link2="ring_med" reason="Never" />
+    <disable_collisions link1="index_med" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="index_med" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="index_med" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="index_med" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link2a" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link2b" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link3" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link4a" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link4b" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link5" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link6a" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link6b" reason="Never" />
+    <disable_collisions link1="index_prox" link2="link7" reason="Never" />
+    <disable_collisions link1="index_prox" link2="palm" reason="Adjacent" />
+    <disable_collisions link1="index_prox" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="index_prox" link2="ring_med" reason="Never" />
+    <disable_collisions link1="index_prox" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="index_prox" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="index_prox" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="index_prox" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="index_prox" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="integration_kit_link" link2="link1" reason="Adjacent" />
+    <disable_collisions link1="integration_kit_link" link2="link2a" reason="Never" />
+    <disable_collisions link1="integration_kit_link" link2="link2b" reason="Never" />
+    <disable_collisions link1="integration_kit_link" link2="link4a" reason="Never" />
+    <disable_collisions link1="integration_kit_link" link2="link4b" reason="Never" />
+    <disable_collisions link1="integration_kit_link" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link1" link2="link2a" reason="Adjacent" />
+    <disable_collisions link1="link1" link2="link2b" reason="Never" />
+    <disable_collisions link1="link1" link2="link3" reason="Never" />
+    <disable_collisions link1="link1" link2="link4a" reason="Never" />
+    <disable_collisions link1="link1" link2="link4b" reason="Never" />
+    <disable_collisions link1="link1" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link2a" link2="link2b" reason="Adjacent" />
+    <disable_collisions link1="link2a" link2="link3" reason="Never" />
+    <disable_collisions link1="link2a" link2="link4a" reason="Never" />
+    <disable_collisions link1="link2a" link2="link4b" reason="Never" />
+    <disable_collisions link1="link2a" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link2b" link2="link3" reason="Adjacent" />
+    <disable_collisions link1="link2b" link2="link4a" reason="Never" />
+    <disable_collisions link1="link2b" link2="link4b" reason="Never" />
+    <disable_collisions link1="link2b" link2="link5" reason="Never" />
+    <disable_collisions link1="link2b" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link2b" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link2b" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link3" link2="link4a" reason="Adjacent" />
+    <disable_collisions link1="link3" link2="link4b" reason="Never" />
+    <disable_collisions link1="link3" link2="link5" reason="Never" />
+    <disable_collisions link1="link3" link2="link6a" reason="Never" />
+    <disable_collisions link1="link3" link2="link6b" reason="Never" />
+    <disable_collisions link1="link3" link2="link7" reason="Never" />
+    <disable_collisions link1="link3" link2="palm" reason="Never" />
+    <disable_collisions link1="link3" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link3" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link3" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link3" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link3" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link3" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link3" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link3" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link4a" link2="link4b" reason="Adjacent" />
+    <disable_collisions link1="link4a" link2="link5" reason="Never" />
+    <disable_collisions link1="link4a" link2="link6a" reason="Never" />
+    <disable_collisions link1="link4a" link2="link6b" reason="Never" />
+    <disable_collisions link1="link4a" link2="link7" reason="Never" />
+    <disable_collisions link1="link4a" link2="palm" reason="Never" />
+    <disable_collisions link1="link4a" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link4a" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link4a" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link4a" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link4a" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link4a" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link4a" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link4a" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link4b" link2="link5" reason="Never" />
+    <disable_collisions link1="link4b" link2="link6a" reason="Never" />
+    <disable_collisions link1="link4b" link2="link6b" reason="Never" />
+    <disable_collisions link1="link4b" link2="link7" reason="Never" />
+    <disable_collisions link1="link4b" link2="palm" reason="Never" />
+    <disable_collisions link1="link4b" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link4b" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link4b" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link4b" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link4b" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link4b" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link4b" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link4b" link2="wire_cover_link" reason="Adjacent" />
+    <disable_collisions link1="link5" link2="link6a" reason="Adjacent" />
+    <disable_collisions link1="link5" link2="link6b" reason="Never" />
+    <disable_collisions link1="link5" link2="link7" reason="Never" />
+    <disable_collisions link1="link5" link2="palm" reason="Never" />
+    <disable_collisions link1="link5" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link5" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link5" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link5" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link5" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link5" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link5" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link5" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link6a" link2="link6b" reason="Adjacent" />
+    <disable_collisions link1="link6a" link2="link7" reason="Never" />
+    <disable_collisions link1="link6a" link2="palm" reason="Never" />
+    <disable_collisions link1="link6a" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link6a" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link6a" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link6a" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link6a" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link6a" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link6a" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link6a" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link6b" link2="link7" reason="Adjacent" />
+    <disable_collisions link1="link6b" link2="palm" reason="Never" />
+    <disable_collisions link1="link6b" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link6b" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link6b" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link6b" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link6b" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link6b" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link6b" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link6b" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="link7" link2="palm" reason="Adjacent" />
+    <disable_collisions link1="link7" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="link7" link2="ring_med" reason="Never" />
+    <disable_collisions link1="link7" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="link7" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="link7" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="link7" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="link7" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="link7" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="palm" link2="ring_dist" reason="Never" />
+    <disable_collisions link1="palm" link2="ring_med" reason="Never" />
+    <disable_collisions link1="palm" link2="ring_prox" reason="Adjacent" />
+    <disable_collisions link1="palm" link2="thumb_base" reason="Adjacent" />
+    <disable_collisions link1="palm" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="palm" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="palm" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="ring_dist" link2="ring_med" reason="Adjacent" />
+    <disable_collisions link1="ring_dist" link2="ring_prox" reason="Never" />
+    <disable_collisions link1="ring_dist" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="ring_dist" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="ring_dist" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="ring_dist" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="ring_dist" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="ring_med" link2="ring_prox" reason="Adjacent" />
+    <disable_collisions link1="ring_med" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="ring_med" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="ring_med" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="ring_med" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="ring_med" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="ring_prox" link2="thumb_base" reason="Never" />
+    <disable_collisions link1="ring_prox" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="ring_prox" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="ring_prox" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="ring_prox" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="thumb_base" link2="thumb_dist" reason="Never" />
+    <disable_collisions link1="thumb_base" link2="thumb_med" reason="Never" />
+    <disable_collisions link1="thumb_base" link2="thumb_prox" reason="Adjacent" />
+    <disable_collisions link1="thumb_base" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="thumb_dist" link2="thumb_med" reason="Adjacent" />
+    <disable_collisions link1="thumb_dist" link2="thumb_prox" reason="Never" />
+    <disable_collisions link1="thumb_dist" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="thumb_med" link2="thumb_prox" reason="Adjacent" />
+    <disable_collisions link1="thumb_med" link2="wire_cover_link" reason="Never" />
+    <disable_collisions link1="thumb_prox" link2="wire_cover_link" reason="Never" />
+</robot>

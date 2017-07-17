@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<launch>
+	<!-- input arguments -->
+	<arg name="coms_interface" default="loopback" />
+	<arg name="baud_rate" default="CAN_BAUD_1M" />
+	<arg name="device" default="can0" />
+	<arg name="ip_address" default="127.0.0.1" />
+	<arg name="port" default="8765" />
+	<arg name="impedance_enabled" default="false" />
+	<arg name="control_enabled" default="true" />
+	<arg name="damping_ratio" default="1.0" />
+	<arg name="stiffness_ratio" default="0.5" />
+	<arg name="console_enabled" default="false" />
+	<arg name="params_file" default="$(find hdt_adroit_driver)/adroit_params.xml" />
+
+	<!-- launch coms node -->
+	<node name="hdt_adroit_coms" pkg="hdt_adroit_driver"  type="hdt_adroit_coms" respawn="false" output="screen">
+		<param name="coms_interface" value="$(arg coms_interface)" />
+		<param name="baud_rate" value="$(arg baud_rate)" />
+		<param name="device" value="$(arg device)" />
+		<param name="ip_address" value="$(arg ip_address)" />
+		<param name="port" value="$(arg port)" />
+		<param name="impedance_enabled" value="$(arg impedance_enabled)" />
+		<param name="control_enabled" value="$(arg control_enabled)" />
+		<param name="damping_ratio" value="$(arg damping_ratio)" />
+		<param name="stiffness_ratio" value="$(arg stiffness_ratio)" />
+		<param name="console_enabled" value="$(arg console_enabled)" />
+		<param name="params_file" value="$(arg params_file)" />
+	</node>
+</launch>

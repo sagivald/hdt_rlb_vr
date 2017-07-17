@@ -1,0 +1,104 @@
+/*
+ * TcpInterface.h
+ *
+ */
+
+#ifndef TCPINTERFACE_H_
+#define TCPINTERFACE_H_
+
+#include <sys/types.h>
+#include <netinet/in.h>
+#include "AperiodicTask.h"
+#include "FifoQ.h"
+
+#define MAX_FIFO_SIZE 1024
+
+class TcpInterface;
+class TcpServer;
+class TcpClient;
+class TcpWriter;
+
+// base class for tcp client and server
+class TcpInterface: public AperiodicTask {
+public:
+	TcpInterface();
+	~TcpInterface() {};
+	int Init(char *name, int port, int size, FifoQ::Mode mode, int priority);
+	int SendData(char *data, int size);
+	int IsConnected(void);
+	void Disconnect(void);
+#ifdef DEBUG
+	int GetReceivedBytes(void) { return ReceivedBytes; }
+	int GetSentBytes(void);
+#endif
+
+	FifoQ *RxFifo;
+protected:
+	virtual void Task() = 0;
+	virtual int TcpInit() = 0;
+
+#ifdef DEBUG
+	int ReceivedBytes;
+#endif
+
+	// TCP/IP
+	int mSocket;
+	sockaddr_in *mServerAddr;
+
+	int mPort;
+	char *mName;
+	TcpWriter *mTcpWriter;
+	int mSize;
+};
+
+// tcp client class
+class TcpClient: public TcpInterface {
+public:
+	TcpClient();
+	~TcpClient() {};
+	int Init(char *name, char *server, int port, int size, FifoQ::Mode mode, int priority);
+private:
+	void Task();
+	int TcpInit();
+
+	char *mServer;
+};
+
+// tcp server class
+class TcpServer: public TcpInterface {
+public:
+	TcpServer();
+	~TcpServer() {};
+	int Init(char *name, int port, int size, FifoQ::Mode mode, int priority);
+private:
+	void Task();
+	int TcpInit();
+
+	int mServerSocket;
+};
+
+// class for writing to tcp sockets
+class TcpWriter: public AperiodicTask {
+public:
+	TcpWriter();
+	~TcpWriter() {};
+	int Init(char *name, int size, FifoQ::Mode mode, int priority) ;
+	int SetSocket(int socket) { mSocket = socket; return 1; };
+#ifdef DEBUG
+	int GetSentBytes(void) { return SentBytes; };
+#endif
+
+	int mSocket;
+	FifoQ *TxFifo;
+private:
+	void Task();
+
+#ifdef DEBUG
+	int SentBytes;
+#endif
+
+	int mSize;
+	char *mName;
+};
+
+#endif /* TCPINTERFACE_H_ */

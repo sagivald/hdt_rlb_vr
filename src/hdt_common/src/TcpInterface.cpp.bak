@@ -1,0 +1,410 @@
+/*----------------------------------------------------------------------------
+ * Name:    TcpInterface.cpp
+ * Purpose: tcp interface class
+ * Note(s):
+ *----------------------------------------------------------------------------*/
+
+#include <termios.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <errno.h>
+
+#include "ros/ros.h"
+
+#include <signal.h>
+#include "TcpInterface.h"
+
+/*----------------------------------------------------------------------------
+  constructor
+ *----------------------------------------------------------------------------*/
+TcpInterface::TcpInterface() : AperiodicTask() {
+}
+
+/*----------------------------------------------------------------------------
+  tcpip init
+ *----------------------------------------------------------------------------*/
+int TcpInterface::Init(char *name, int port, int size, FifoQ::Mode mode, int priority) {
+	int ret = 1;
+
+	// setup name
+	mName = name;
+	mPort = port;
+	mSize = size;
+
+	if ((mSize > 0) && (mSize <= MAX_FIFO_SIZE)) {
+		// initialize fifo
+		RxFifo = new FifoQ(sizeof(char), mSize, mode);
+	}
+	else {
+		return -1;
+	}
+
+	// Initialize tcp
+	mServerAddr = new struct sockaddr_in();
+	if (TcpInit() == -1) {
+		return -1;
+	}
+
+	// initialize associated Tcpip writer
+	mTcpWriter = new TcpWriter();
+	ret = mTcpWriter->Init(name, mSize, mode, priority);
+	mTcpWriter->SetSocket(-1);
+
+#ifdef DEBUG
+	ReceivedBytes = 0;
+#endif
+
+	AperiodicTask::Init(mName, priority);
+
+	return ret;
+}
+
+/*----------------------------------------------------------------------------
+  check connection state
+ *----------------------------------------------------------------------------*/
+int TcpInterface::IsConnected(void) {
+	if(mSocket < 0) return 0;
+	else return 1;
+}
+
+/*----------------------------------------------------------------------------
+  disconnect socket
+ *----------------------------------------------------------------------------*/
+void TcpInterface::Disconnect(void) {
+	if(IsConnected()) {
+		close(mSocket);
+		mSocket = -1;
+		mTcpWriter->SetSocket(-1);
+	}
+}
+
+#ifdef DEBUG
+/*----------------------------------------------------------------------------
+  get sent bytes
+ *----------------------------------------------------------------------------*/
+int TcpInterface::GetSentBytes(void) {
+	return mTcpWriter->GetSentBytes();
+}
+#endif
+
+/*----------------------------------------------------------------------------
+  send message
+ *----------------------------------------------------------------------------*/
+int TcpInterface::SendData(char *data, int size) {
+	// can't send if not connected
+	if(mSocket < 0) return -1;
+
+	// check for valid size
+	if((size > 0) && (size < mSize)) {
+		// add to buffer
+		for(int i = 0; i < size; i++) {
+			// check for fifo error
+			if(mTcpWriter->TxFifo->Put(&data[i]) < 0) {
+#ifdef DEBUG
+				ROS_ERROR("can't write to txfifo");
+#endif
+				return -1;
+			}
+		}
+
+		// trigger writer
+		mTcpWriter->Trigger(0);
+	}
+	else {
+#ifdef DEBUG
+		ROS_ERROR("message size too large to send");
+#endif
+		return -1;
+	}
+
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+  constructor
+ *----------------------------------------------------------------------------*/
+TcpClient::TcpClient() : TcpInterface() {
+}
+
+/*----------------------------------------------------------------------------
+  tcpip init
+ *----------------------------------------------------------------------------*/
+int TcpClient::Init(char *name, char *server, int port, int size, FifoQ::Mode mode, int priority) {
+	// initialize
+	mServer = server;
+	mSocket = -1;
+
+	// initialize tcp interface
+	int ret = TcpInterface::Init(name, port, size, mode, priority);
+
+	return ret;
+}
+
+/*----------------------------------------------------------------------------
+  connection and read task
+ *----------------------------------------------------------------------------*/
+void TcpClient::Task() {
+	char data[mSize];
+
+	// loop trying to connect to server
+	while(1) {
+		mSocket = socket(AF_INET, SOCK_STREAM, 0);
+		if (mSocket < 0) {
+			ROS_ERROR("TcpIpInit: error opening socket");
+			break;
+		}
+
+		int opt = 1;
+		if (setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(int)) < 0) {
+			ROS_ERROR("TcpIpInit: error setting socket option for SO_REUSEADDR using SOL_SOCKET");
+			close(mSocket);
+			break;
+		}
+		if (setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, (char *) &opt, sizeof(int)) < 0) {
+			ROS_ERROR("TcpIpInit: error setting socket option for SO_REUSEADDR using SOL_SOCKET");
+			close(mSocket);
+			break;
+		}
+
+		memset(mServerAddr, 0x00, sizeof(struct sockaddr_in));
+		mServerAddr->sin_family = AF_INET;
+		mServerAddr->sin_addr.s_addr = inet_addr(mServer);
+		mServerAddr->sin_port = htons(mPort);
+
+		if((connect(mSocket, (struct sockaddr*)mServerAddr, sizeof(struct sockaddr_in))) < 0){
+			ROS_ERROR("TcpIpInit: can't connect to server");
+			close(mSocket);
+			mSocket = -1;
+			// wait one second before trying to connect again
+			usleep(1000*1000);
+			continue;
+	   }
+
+		// set output socket
+		mTcpWriter->SetSocket(mSocket);
+		ROS_DEBUG("socket opened %d", (int)mSocket);
+
+		while (1) {
+			int ret;
+			// block on read, put data in buffer
+			ret = read(mSocket, &data, mSize);
+
+			if(ret > 0) {
+#ifdef DEBUG
+				ReceivedBytes += ret;
+#endif
+
+				// put all data into fifo
+				for(int i = 0; i < ret; i++) {
+//					ROS_INFO("%x", data);
+					int rx_ret = RxFifo->Put(&data[i]);
+#ifdef DEBUG
+					if(rx_ret <= 0) ROS_ERROR("unable to put data in rx fifo");
+#endif
+				}
+			}
+			else {
+				ROS_DEBUG("socket closed");
+				close(mSocket);
+
+				mSocket = -1;
+				mTcpWriter->SetSocket(mSocket);
+				break;
+			}
+		}
+	}
+}
+
+/*----------------------------------------------------------------------------
+  socket settings
+ *----------------------------------------------------------------------------*/
+int TcpClient::TcpInit() {
+	return 1;
+}
+
+
+/*----------------------------------------------------------------------------
+  constructor
+ *----------------------------------------------------------------------------*/
+TcpServer::TcpServer() : TcpInterface() {
+}
+
+/*----------------------------------------------------------------------------
+  tcpip init
+ *----------------------------------------------------------------------------*/
+int TcpServer::Init(char *name, int port, int size, FifoQ::Mode mode, int priority) {
+	int ret = 1;
+
+	// reset socket
+	mSocket = -1;
+	mServerSocket = -1;
+
+	// initialize tcp interface
+	TcpInterface::Init(name, port, size, mode, priority);
+
+	return ret;
+}
+
+/*----------------------------------------------------------------------------
+  connection and read task
+ *----------------------------------------------------------------------------*/
+void TcpServer::Task() {
+	char data[mSize];
+
+	// loop trying to connect to client
+	while(1) {
+		mSocket = accept(mServerSocket, 0, 0);
+		if (mSocket == -1) {
+			ROS_ERROR("Error accepting socket");
+			continue;
+		}
+		else {
+			int opt = 1;
+			if (setsockopt(mSocket, IPPROTO_TCP, TCP_NODELAY, (char *) &opt, sizeof(int)) < 0) {
+				ROS_ERROR("Error setting socket option for TCP_NODELAY using IPPROTO");
+				close(mSocket);
+				continue;
+			}
+		}
+
+		// set writer socket
+		mTcpWriter->SetSocket(mSocket);
+		ROS_DEBUG("socket opened %d", (int)mSocket);
+
+		while (1) {
+			int ret;
+			// block on read, put data in buffer
+			ret = read(mSocket, &data, mSize);
+
+			if(ret > 0) {
+				// put all data into fifo
+#ifdef DEBUG
+				ReceivedBytes += ret;
+#endif
+
+				for(int i = 0; i < ret; i++) {
+//				printf("%x\n", data);
+					int rx_ret = RxFifo->Put(&data[i]);
+#ifdef DEBUG
+					if(rx_ret <= 0) ROS_ERROR("unable to put data in rx fifo\n");
+#endif
+				}
+			}
+			else {
+				ROS_DEBUG("socket closed");
+				close(mSocket);
+
+				// reset sockets
+				mSocket = -1;
+				mTcpWriter->SetSocket(mSocket);
+				break;
+			}
+		}
+	}
+}
+
+/*----------------------------------------------------------------------------
+  socket settings
+ *----------------------------------------------------------------------------*/
+int TcpServer::TcpInit() {
+	mServerSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if (mServerSocket < 0) {
+		ROS_ERROR("TcpIpInit: error opening socket");
+		return -1;
+	}
+
+	int opt = 1;
+	if (setsockopt(mServerSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(int)) < 0) {
+		ROS_ERROR("TcpIpInit: error setting socket option for SO_REUSEADDR using SOL_SOCKET");
+		return -1;
+	}
+
+	mServerAddr->sin_family = AF_INET;
+	mServerAddr->sin_addr.s_addr = INADDR_ANY;
+	mServerAddr->sin_port = htons(mPort);
+	memset(&(mServerAddr->sin_zero), '\0', 8);
+
+	if (bind(mServerSocket, (struct sockaddr *) mServerAddr, sizeof(struct sockaddr)) < 0) {
+		ROS_ERROR("TcpipInit: error binding socket: %s", strerror(errno));
+		return -1;
+	}
+
+	if (listen(mServerSocket, 2) == -1) {
+		ROS_ERROR("TcpipInit: listen failed");
+		return -1;
+	}
+
+	signal(SIGPIPE, SIG_IGN);
+
+	return 1;
+}
+
+/*----------------------------------------------------------------------------
+  writer thread constructor
+ *----------------------------------------------------------------------------*/
+TcpWriter::TcpWriter() : AperiodicTask() {
+}
+
+/*----------------------------------------------------------------------------
+  writer thread init
+ *----------------------------------------------------------------------------*/
+int TcpWriter::Init(char *name, int size, FifoQ::Mode mode, int priority) {
+	int ret = 1;
+
+	// setup name
+	mName = name;
+	mSocket = -1;
+	mSize = size;
+
+	if ((mSize > 0) && (mSize <= MAX_FIFO_SIZE)) {
+		// initialize fifo
+		TxFifo = new FifoQ(sizeof(char), mSize, mode);
+	}
+	else {
+		return -1;
+	}
+
+#ifdef DEBUG
+	SentBytes = 0;
+#endif
+
+	AperiodicTask::Init((char *)"TcpWriter", priority);
+
+	return ret;
+}
+
+
+/*----------------------------------------------------------------------------
+  writer task
+ *----------------------------------------------------------------------------*/
+void TcpWriter::Task() {
+//	char data;
+	char data[mSize];
+	int ret, i;
+
+	while (1) {
+		TriggerWait();
+
+		// get available data
+		i = 0;
+		while(TxFifo->Get(&data[i]) > 0) {
+			// added byte to buffer
+			i++;
+		}
+
+		// send message if bytes available
+		if((i > 0) & (mSocket >= 0)) {
+			ret = write(mSocket, &data, i);
+#ifdef DEBUG
+			SentBytes += ret;
+			if(ret != i) ROS_ERROR("sent data mismatch");
+#endif
+		}
+	}
+}

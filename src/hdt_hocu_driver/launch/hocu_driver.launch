@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<launch>
+	<!-- input arguments -->
+	<arg name="port" default="8766" />
+
+	<!-- launch HOCU Driver node -->
+	<node name="hocu_driver" pkg="hdt_hocu_driver"  type="hocu_driver" respawn="false" output="screen">
+		<param name="port" value="$(arg port)" />
+	</node>
+</launch>

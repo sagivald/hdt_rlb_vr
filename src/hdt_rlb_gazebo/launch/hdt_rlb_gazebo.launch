@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<launch>
+	<!-- gazebo arguments -->
+	<arg name="paused" default="false"/>
+	<arg name="use_sim_time" default="true"/>
+	<arg name="gui" default="true"/>
+	<arg name="headless" default="false"/>
+	<arg name="debug" default="false"/>
+
+	<!-- launch gazebo with empty world -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find hdt_rlb_gazebo)/worlds/hdt_alias.world"/>
+		<arg name="debug" value="$(arg debug)"/>
+		<arg name="gui" value="$(arg gui)"/>
+		<arg name="paused" value="$(arg paused)"/>
+		<arg name="use_sim_time" value="$(arg use_sim_time)"/>
+		<arg name="headless" value="$(arg headless)"/>
+	</include>
+
+	<!-- Load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find hdt_rlb_control)/config/hdt_rlb_control.yaml" command="load"/>
+
+	<!-- load the controllers -->
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/hdt_rlb"
+		args="joint1_position_controller
+			joint2_position_controller
+			joint4_position_controller
+			joint5_position_controller
+			joint6_position_controller
+			joint7_position_controller
+			joint_state_controller"/>
+
+	<!-- load urdf
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find hdt_rlb_description)/urdf/hdt_rlb.xacro'"/> -->
+
+	<!-- spawn robot -->
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model hdt_rlb -param robot_description"/>
+</launch>

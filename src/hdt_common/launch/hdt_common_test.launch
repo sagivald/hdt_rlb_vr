@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<launch>
+	<!-- launch coms node 0 -->
+	<node name="hdt_common_test0" pkg="hdt_common"  type="hdt_common_test" respawn="false" output="screen">
+		<param name="baud" value="9600" />
+		<param name="device" value="/dev/ttyUSB0" />
+	</node>
+
+	<!-- launch coms node 1 -->
+	<node name="hdt_common_test1" pkg="hdt_common"  type="hdt_common_test" respawn="false" output="screen">
+		<param name="baud" value="9600" />
+		<param name="device" value="/dev/ttyUSB1" />
+	</node>
+</launch>

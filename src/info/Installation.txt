@@ -1,0 +1,23 @@
+packages needed
+------------------
+1. Installing ROS Indigo from http://wiki.ros.org/ROS/Installation - walking thorugh the whole guide
+2. Installing external packages
+    opening terminal and typing
+
+    $ sudo apt-get install ros-indigo-axis-camera
+    $ sudo apt-get install ros-indigo-leap-motion
+    $ sudo apt-get install ros-indigo-moveit-full
+    $ sudo apt-get install ros-indigo-joy
+
+2. cloning hdt_ws to home directory
+3. opening terminal and typing
+
+$ cd hdt_ws
+$ catkin_make install
+
+** if there are missing packages install them using apt-get or synaptic
+
+4. replace axis.py file in ../../opt/ros/indigo/lib/axis_camera
+    running the command :
+    $ sudo cp ~/hdt_ws/src/info/axis.py ../../opt/ros/indigo/lib/axis_camera
+------------------
