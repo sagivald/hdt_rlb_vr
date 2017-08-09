@@ -63,7 +63,7 @@ int ArmControl::Init(void) {
 	}
 
 	if(use_leap){
-		leap_sub = nh.subscribe(LEAP_MOTION_TOPIC, 100, &ArmControl::LeapCb, this);
+		leap_sub = nh.subscribe(LEAP_MOTION_TOPIC, 10, &ArmControl::LeapCb, this);
 	}
 
 	// check for robot description
@@ -841,10 +841,16 @@ void ArmControl::LeapCb(const leap_motion::leapros& msg) {
 	pitch *= K_PITCH;
 	roll *= K_ROLL;
 	//ROS_INFO("pitch = %f",pitch*(180/PI));
-
+	double lim=0.5;
 	endpoint_pose.position.x = x;
 	endpoint_pose.position.y = y;
 	endpoint_pose.position.z = z;
+	if(x>lim)endpoint_pose.position.x=lim;
+	if(x<-lim)endpoint_pose.position.x=-lim;
+	if(y>lim)endpoint_pose.position.y = lim;
+	if(y<-lim)endpoint_pose.position.y = -lim;
+	if(z<-lim)endpoint_pose.position.z = -lim;
+	if(z>lim)endpoint_pose.position.z = lim;
 	
 	//roll = 0; pitch = 0; yaw = PI/2;
 	//q = RPYtoQuat(roll,pitch,yaw);
