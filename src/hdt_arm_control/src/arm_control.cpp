@@ -3,9 +3,10 @@
 #include <eigen_conversions/eigen_msg.h>
 
 #include "hdt_adroit_driver/ComsReady.h"
-
+#include <tf/tf.h>
 #include "arm_control.h"
-
+#include <geometry_msgs/Quaternion.h>
+#include <math.h>
 // this program is used for each motion of the robotic arm, executes the new path according to the calculated input from the commands
 
 geometry_msgs::Pose test_pose;
@@ -359,7 +360,7 @@ void ArmControl::JoyControlArmCb(void) {
 		}
 	}
 	else {
-		ROS_INFO("Did not find IK solution");
+		// ROS_INFO("Did not find IK solution");
 		// revert endpoint state to previous cmd
 		//kinematic_state->setVariableValues(joint_space_fb_msg);
 		//endpoint_state = kinematic_state->getGlobalLinkTransform(ik_link_name);
@@ -835,43 +836,127 @@ void ArmControl::PPCb(const moveit_msgs::MoveGroupActionGoal& msg) {
   Output: None
   Operation: control the robotic arm according to leap motion commands
  *----------------------------------------------------------------------------*/
+ double lastLeapUpdate=0;
+ double leapHz=0.05;
 void ArmControl::LeapCb(const leap_motion::leapros& msg) {
 	//ROS_INFO("ArmControl::LeapCb");
-
+	if(ros::Time::now().toSec()>lastLeapUpdate+leapHz){
 	// end point = center of the robotic arm palm
 	// defning variables for position and orientation
 	double x,y,z,yaw,pitch,roll;
 	
 	// calculating end point position - transformation from leap motion coordinate system to robotic arm palm coordinate system
-	x = START_X + GRADIENT_X * msg.palmpos.x;
-	y = START_Y + GRADIENT_Y * msg.palmpos.z;
-	z = START_Z + GRADIENT_Z * msg.palmpos.y;
+	x = START_X + GRADIENT_X * msg.palmpos.x*0.75;
+	y = START_Y + GRADIENT_Y * msg.palmpos.z*0.75;
+	z = START_Z+0.1 + GRADIENT_Z * msg.palmpos.y*0.75;
 
 	// calculating end point orientation - transformation from leap motion coordinate system to robotic arm palm coordinate system
 	yaw = atan2(msg.normal.y,msg.normal.x) + PI;
 	pitch = -atan2(msg.direction.y,-msg.direction.z);
 	roll = atan2(msg.direction.z,msg.direction.x) + PI/2;
-	yaw *= K_YAW;
-	pitch *= K_PITCH;
-	roll *= K_ROLL;
+	// yaw=msg.ypr.x;
+	// pitch=msg.ypr.y;
+	// roll=msg.ypr.z;
+	// yaw *= K_YAW;
+	// pitch *= K_PITCH;
+	// roll *= K_ROLL;
 
 	// setting end point position
-	endpoint_pose.position.x = x;
+	// endpoint_pose.position.x = x;
+	// endpoint_pose.position.y = y;
+	// endpoint_pose.position.z = z;
+	double lim=0.6;
+	endpoint_pose.position.x = x; 
 	endpoint_pose.position.y = y;
 	endpoint_pose.position.z = z;
+	if(x>lim)endpoint_pose.position.x=lim;
+	if(x<-lim)endpoint_pose.position.x=-lim;
+	if(y>lim*1.5)endpoint_pose.position.y = lim*1.5;
+	if(y<-lim)endpoint_pose.position.y = -lim;
+	if(z<-lim+0.1)endpoint_pose.position.z = -lim+0.1;
+	if(z>lim*2.5)endpoint_pose.position.z = lim*2.5;
+	// tf::Quaternion q;
+  	// q.setRPY(roll, pitch, yaw);
+  	// geometry_msgs::Quaternion odom_quat;
+  	// tf::quaternionTFToMsg(q, endpoint_pose.orientation);
+	//setting end point orientation - transformation from Euler Angles to Quaternion
+	double t0 = cos(yaw * 0.5);
+	double t1 = sin(yaw * 0.5);
+	double t2 = cos(pitch * 0.5);
+	double t3 = sin(pitch * 0.5);
+	double t4 = cos(roll * 0.5);
+	double t5 = sin(roll * 0.5);
+	endpoint_pose.orientation.x = t0 * t2 * t5 + t1 * t3 * t4;
+	endpoint_pose.orientation.y = t0 * t3 * t5 + t1 * t2 * t4;
+	endpoint_pose.orientation.z = t0 * t3 * t4 - t1 * t2 * t5;
+	endpoint_pose.orientation.w = t0 * t2 * t4 - t1 * t3 * t5;
+	// endpoint_pose.orientation.x = t0 * t2 * t4 + t1 * t3 * t5;
+	// endpoint_pose.orientation.y = t0 * t3 * t4 - t1 * t2 * t5;
+	// endpoint_pose.orientation.z = t0 * t2 * t5 + t1 * t3 * t4;
+	// endpoint_pose.orientation.w = t1 * t2 * t4 - t0 * t3 * t5;
+	// endpoint_pose.orientation.x = sin(yaw/2)*sin(pitch/2)*cos(roll/2) + cos(yaw/2)*cos(pitch/2)*sin(roll/2);
+	// endpoint_pose.orientation.y = sin(yaw/2)*cos(pitch/2)*cos(roll/2) + cos(yaw/2)*sin(pitch/2)*sin(roll/2);
+	// endpoint_pose.orientation.z = cos(yaw/2)*sin(pitch/2)*cos(roll/2) - sin(yaw/2)*cos(pitch/2)*sin(roll/2);
+	// endpoint_pose.orientation.w = cos(yaw/2)*cos(pitch/2)*cos(roll/2) - sin(yaw/2)*sin(pitch/2)*sin(roll/2);
+	// tf::Vector3 m2(msg.direction.x,msg.direction.y,msg.direction.z); // Just in case.
+	// tf::Vector3 m3(msg.normal.x,msg.normal.y,msg.normal.z);; // Just in case.
+    // tf::Vector3 m0 = m3.cross(m2).normalized();
+
+    //  float m00 = m0[0];
+    //  float m01 = m0[1];
+    //  float m02 = m0[2];
+    //  float m10 = msg.normal.x;
+    //  float m11 = msg.normal.y;
+    //  float m12 = msg.normal.z;
 	
-	// setting end point orientation - transformation from Euler Angles to Quaternion
-	endpoint_pose.orientation.w = cos(yaw/2)*cos(pitch/2)*cos(roll/2) - sin(yaw/2)*sin(pitch/2)*sin(roll/2);
-	endpoint_pose.orientation.x = sin(yaw/2)*sin(pitch/2)*cos(roll/2) + cos(yaw/2)*cos(pitch/2)*sin(roll/2);
-	endpoint_pose.orientation.y = sin(yaw/2)*cos(pitch/2)*cos(roll/2) + cos(yaw/2)*sin(pitch/2)*sin(roll/2);
-	endpoint_pose.orientation.z = cos(yaw/2)*sin(pitch/2)*cos(roll/2) - sin(yaw/2)*cos(pitch/2)*sin(roll/2);
+	// //  std::cout << m10 << m11 << m12;
+    //  float m20 = msg.direction.x;
+    //  float m21 = msg.direction.y;
+    //  float m22 = msg.direction.z;
+	//  float num, num7, num4, num6, num3, num5, num2;
+ 
+    //  float num8 = (m00 + m11) + m22;
+    //  if (num8 > 0)
+    //  {
+    //       num = (float)sqrt(num8 + 1);
+    //      endpoint_pose.orientation.w = num * 0.5;
+    //      num = 0.5 / num;
+    //      endpoint_pose.orientation.x = (m12 - m21) * num;
+    //      endpoint_pose.orientation.y = (m20 - m02) * num;
+    //      endpoint_pose.orientation.z = (m01 - m10) * num;
+    //  }
+    //  else if ((m00 >= m11) && (m00 >= m22))
+    //  {
+    //       num7 = (float)sqrt(((1 + m00) - m11) - m22);
+    //      num4 = 0.5 / num7;
+    //      endpoint_pose.orientation.x = 0.5 * num7;
+    //      endpoint_pose.orientation.y = (m01 + m10) * num4;
+    //      endpoint_pose.orientation.z = (m02 + m20) * num4;
+    //      endpoint_pose.orientation.w = (m12 - m21) * num4;
+    //  }
+    //  else if (m11 > m22)
+    //  {
+    //       num6 = (float)sqrt(((1 + m11) - m00) - m22);
+    //       num3 = 0.5 / num6;
+    //      endpoint_pose.orientation.x = (m10+ m01) * num3;
+    //      endpoint_pose.orientation.y = 0.5 * num6;
+    //      endpoint_pose.orientation.z = (m21 + m12) * num3;
+    //      endpoint_pose.orientation.w = (m20 - m02) * num3;
+    //  }
+	// else { num5 = (float)sqrt(((1 + m22) - m00) - m11);
+    //   num2 = 0.5 / num5;
+    //  endpoint_pose.orientation.x = (m20 + m02) * num2;
+    //  endpoint_pose.orientation.y = (m21 + m12) * num2;
+    //  endpoint_pose.orientation.z = 0.5 * num5;
+    //  endpoint_pose.orientation.w = (m01 - m10) * num2;}
 
 	// setting fingers position according to fingle angle function
 	theta_index = FingerAngle (msg.index_metacarpal,msg.index_tip,msg.direction);
 	theta_middle = FingerAngle (msg.middle_metacarpal,msg.middle_tip,msg.direction);
 	theta_thumb = FingerAngle (msg.thumb_metacarpal,msg.thumb_tip,msg.direction);
 	phi_thumb = FingerAngle (msg.thumb_metacarpal,msg.thumb_tip,msg.normal);
-
+	lastLeapUpdate=ros::Time::now().toSec();
+	}
 	
 }
 
