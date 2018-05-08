@@ -1,0 +1,11 @@
+<launch>
+	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+	<include file="$(find hdt_arm_control)/launch/rlb_arm_control.launch">
+		<arg name="use_axis" value="true" />
+		<arg name="connection" value="tcpcoms" />
+	</include>
+
+	<node name="arm_control_unity_ctrl" pkg="hdt_arm_control" type="unitySubPub.py" />
+	<node name="arm_control_unity_send" pkg="hdt_arm_control" type="unityNode.py" />	
+
+</launch>

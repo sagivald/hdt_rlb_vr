@@ -20,4 +20,14 @@ $ catkin_make install
 4. replace axis.py file in ../../opt/ros/indigo/lib/axis_camera
     running the command :
     $ sudo cp ~/hdt_ws/src/info/axis.py ../../opt/ros/indigo/lib/axis_camera
+
+
+5. Install Xbox One Wireless Bluetooth controlelr
+
+	5.1 clone xpad0.4 from github
+	5.2 install according to git
+	5.3 restart computer --> now the controller will work wired
+	5.4 sudo cp rc.local to /etc
+	5.4 sudo cp 51-joystick.conf to /usr/share/X11/xorg.conf.d/
+	5.5 restart the computer --> now the controller will work wireless via bluetooth
 ------------------

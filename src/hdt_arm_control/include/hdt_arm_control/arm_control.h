@@ -13,6 +13,7 @@
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Wrench.h"
 #include "geometry_msgs/Transform.h"
+#include "geometry_msgs/Pose.h"
 
 // Leap Motion Libraries
 #include "math.h"
@@ -22,6 +23,7 @@
 #include "sensor_msgs/Joy.h"
 #include "sensor_msgs/MultiDOFJointState.h"
 #include "sensor_msgs/JointState.h"
+#include "sensor_msgs/ChannelFloat32.h"
 
 // Standard Messages
 #include "std_msgs/Float64.h"
@@ -50,7 +52,7 @@
 #define JOY_TOPIC				"/joy"
 #define JOY_NUM_AXES				8
 #define JOY_NUM_BUTTONS				11
-#define MAX_TRANS_VEL				0.15			// 15 cm/sec
+#define MAX_TRANS_VEL				0.25			// 15 cm/sec
 #define MAX_ROT_VEL				0.7845			// 45 deg/sec
 #define MAX_ROTATION				0.7854
 #define MAX_HAND_VEL				3.1416
@@ -77,6 +79,9 @@
 
 // leap motion
 #define LEAP_MOTION_TOPIC			"leapmotion/data"
+#define UNITY_TOPIC					"unity_ros"
+#define UNITY_FINGERS_TOPIC			"unity_ros/fingers"
+
 #define PI					3.14159265359
 #define START_X					-0.105
 #define GRADIENT_X				-0.0064333
@@ -137,6 +142,8 @@ private:
 	void PPCb(const moveit_msgs::MoveGroupActionGoal& msg);
 	void HocuCallback(const sensor_msgs::Joy& msg);
 	void LeapCb(const leap_motion::leapros& msg);
+	void UnityCb(const geometry_msgs::Pose& msg);
+	void UnityFingersCb(const sensor_msgs::ChannelFloat32& msg);
 	void JoyControlArmCb(void);
 	void JoyControlHandCb(void);
 
@@ -144,7 +151,6 @@ private:
 	bool use_adroit_coms;
 	sensor_msgs::JointState joint_telem_msg;
 	ros::Subscriber joint_telem_sub;
-
 	// gazebo variables
 	bool use_gazebo;
 	std::vector<std_msgs::Float64> gazebo_cmd_msg;
@@ -179,6 +185,7 @@ private:
 	// joy variables
 	ros::Subscriber joy_sub;
 	sensor_msgs::Joy joy_msg;
+	bool mode_a,mode_b;
 
 	// gui variables
 	bool use_gui;
@@ -193,7 +200,11 @@ private:
 
 	// leap motion variables
 	bool use_leap;
+	bool use_unity;
 	ros::Subscriber leap_sub;
+	ros::Subscriber unity_sub,unity_fingers_sub;
+	ros::Publisher endpoint_state_pub;
+	
 	geometry_msgs::Pose endpoint_pose; 
 	double theta_index,theta_middle,theta_thumb,phi_thumb;
 	double FingerAngle (geometry_msgs::Point a,geometry_msgs::Point b,geometry_msgs::Vector3 u);
